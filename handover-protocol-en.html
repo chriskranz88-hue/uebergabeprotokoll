@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Handover Protocol</title>
+    <title>Handover Protocol v2</title>
+    
+    <!-- jsPDF and jsPDF-AutoTable for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -50,7 +55,6 @@
             color: white;
             text-decoration: none;
             opacity: 0.9;
-            transition: opacity 0.3s;
         }
         
         .back-link:hover {
@@ -81,6 +85,15 @@
         
         .instructions li {
             margin-bottom: 8px;
+        }
+        
+        .info-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
         }
         
         .section {
@@ -154,7 +167,6 @@
             background: #fff5f5;
         }
         
-        input[type="checkbox"],
         input[type="radio"] {
             margin-right: 8px;
             cursor: pointer;
@@ -174,7 +186,8 @@
             margin-bottom: 10px;
         }
         
-        .remarks:focus {
+        .remarks:focus,
+        input:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -279,16 +292,59 @@
             color: #333;
         }
         
-        .signature-field input {
+        .signature-field input[type="text"],
+        .signature-field input[type="email"],
+        .signature-field input[type="date"] {
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 14px;
         }
         
-        .signature-field input:focus {
-            outline: none;
-            border-color: #667eea;
+        .signature-canvas-container {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            margin-bottom: 20px;
+        }
+        
+        .signature-canvas-label {
+            background: #f5f5f5;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .signature-canvas {
+            display: block;
+            width: 100%;
+            height: 150px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        
+        .signature-buttons {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+        
+        .clear-signature {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .clear-signature:hover {
+            background: #d32f2f;
         }
         
         .submit-section {
@@ -308,9 +364,11 @@
             transition: background 0.3s;
             width: 100%;
             max-width: 400px;
+            margin: 10px auto;
+            display: block;
         }
         
-        .submit-btn:hover {
+        .submit-btn:hover:not(:disabled) {
             background: #660000;
         }
         
@@ -328,6 +386,16 @@
             border-left: 4px solid #ff9800;
         }
         
+        .success-message {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+        
         @media (max-width: 768px) {
             .content {
                 padding: 20px;
@@ -338,8 +406,8 @@
                 gap: 10px;
             }
             
-            .checkbox-label {
-                justify-content: flex-start;
+            .signature-canvas {
+                height: 120px;
             }
         }
     </style>
@@ -347,7 +415,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <a href="index.html" class="back-link">← Back to language selection</a>
+            <a href="index.html" class="back-link">← Back to Language Selection</a>
             <h1>🏠 Handover Protocol</h1>
             <p>Documentation of Condition at Handover</p>
         </div>
@@ -356,24 +424,21 @@
             <div class="instructions">
                 <h2>📋 Instructions</h2>
                 <ol>
-                    <li>First fill out the property details</li>
-                    <li>Go through all categories</li>
-                    <li>Take photos directly with your phone camera</li>
-                    <li>Upload photos for each section</li>
-                    <li>Sign at the end</li>
-                    <li>Click "Submit Protocol"</li>
+                    <li>Fill out all fields</li>
+                    <li>Take photos (automatically compressed)</li>
+                    <li>Sign digitally with your finger</li>
+                    <li>Click "Create & Download PDF"</li>
+                    <li>Send the PDF via email to all parties</li>
                 </ol>
             </div>
 
-            <form id="handoverForm" action="https://formsubmit.co/chriskranz88@googlemail.com" method="POST" enctype="multipart/form-data">
+            <div class="info-box">
+                <strong>✨ New:</strong> Digital signature with finger • Auto-compression of photos • PDF download with all data
+            </div>
+
+            <form id="handoverForm">
                 
-                <!-- Hidden fields for FormSubmit -->
-                <input type="hidden" name="_subject" value="Handover Protocol (ENGLISH)">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_template" value="table">
-                <input type="text" name="_honey" style="display:none">
-                
-                <!-- PROPERTY DETAILS -->
+                <!-- OBJEKTDATEN -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">🏢 Property Details</h2>
@@ -381,7 +446,7 @@
                     <div class="section-content">
                         <div class="item">
                             <div class="item-name">Address *</div>
-                            <textarea class="remarks" name="property_address" placeholder="Street, Number, Postal Code, City&#10;e.g. Engadinerstr. 36, 81475 Munich" required style="min-height: 80px;"></textarea>
+                            <textarea class="remarks" id="property_address" placeholder="Street, Number, Postal Code, City&#10;z.B. Engadinerstr. 36, 81475 Munich" required style="min-height: 80px;"></textarea>
                         </div>
 
                         <div class="item">
@@ -397,13 +462,13 @@
                                 </label>
                             </div>
                             <div id="room_number_field" style="display: none; margin-top: 15px;">
-                                <textarea class="remarks" name="room_number" placeholder="Room Number / Description&#10;e.g. Room 1, Room 2A, etc." style="min-height: 60px;"></textarea>
+                                <textarea class="remarks" id="room_number" placeholder="Roomnummer / Bezeichnung&#10;z.B. Room 1, Room 2A, etc." style="min-height: 60px;"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- ROOM -->
+                <!-- ZIMMER -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">🚪 Room</h2>
@@ -424,16 +489,12 @@
                                     <input type="radio" name="room_walls" value="Damaged" onchange="updateRadio(this)">
                                     <span>Damaged</span>
                                 </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="room_walls" value="Missing" onchange="updateRadio(this)">
-                                    <span>Missing</span>
-                                </label>
                             </div>
-                            <textarea class="remarks" name="room_walls_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="room_walls_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_room_walls">
                                     📷 Upload photos of walls
-                                    <input type="file" name="room_walls_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'room_walls')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'room_walls')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_room_walls"></div>
                             </div>
@@ -454,16 +515,12 @@
                                     <input type="radio" name="room_floor" value="Damaged" onchange="updateRadio(this)">
                                     <span>Damaged</span>
                                 </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="room_floor" value="Missing" onchange="updateRadio(this)">
-                                    <span>Missing</span>
-                                </label>
                             </div>
-                            <textarea class="remarks" name="room_floor_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="room_floor_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_room_floor">
                                     📷 Upload photos of floor
-                                    <input type="file" name="room_floor_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'room_floor')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'room_floor')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_room_floor"></div>
                             </div>
@@ -484,16 +541,12 @@
                                     <input type="radio" name="room_windows" value="Damaged" onchange="updateRadio(this)">
                                     <span>Damaged</span>
                                 </label>
-                                <label class="checkbox-label">
-                                    <input type="radio" name="room_windows" value="Missing" onchange="updateRadio(this)">
-                                    <span>Missing</span>
-                                </label>
                             </div>
-                            <textarea class="remarks" name="room_windows_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="room_windows_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_room_windows">
                                     📷 Upload photos of windows
-                                    <input type="file" name="room_windows_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'room_windows')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'room_windows')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_room_windows"></div>
                             </div>
@@ -507,20 +560,20 @@
                                     <span>Excellent</span>
                                 </label>
                                 <label class="checkbox-label">
-                                    <input type="radio" name="room_cleanliness" value="Slightly dirty" onchange="updateRadio(this)">
-                                    <span>Slightly dirty</span>
+                                    <input type="radio" name="room_cleanliness" value="Slightly Dirty" onchange="updateRadio(this)">
+                                    <span>Slightly Dirty</span>
                                 </label>
                                 <label class="checkbox-label">
-                                    <input type="radio" name="room_cleanliness" value="Very dirty" onchange="updateRadio(this)">
-                                    <span>Very dirty</span>
+                                    <input type="radio" name="room_cleanliness" value="Very Dirty" onchange="updateRadio(this)">
+                                    <span>Very Dirty</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="room_cleanliness_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="room_cleanliness_remarks" placeholder="Remarks..."></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- FURNITURE -->
+                <!-- MÖBEL -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">🛋️ Furniture</h2>
@@ -546,11 +599,11 @@
                                     <span>Missing</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="furniture_bed_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="furniture_bed_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_furniture_bed">
                                     📷 Upload photos of bed
-                                    <input type="file" name="furniture_bed_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_bed')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'furniture_bed')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_furniture_bed"></div>
                             </div>
@@ -576,11 +629,11 @@
                                     <span>Missing</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="furniture_desk_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="furniture_desk_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_furniture_desk">
                                     📷 Upload photos of desk
-                                    <input type="file" name="furniture_desk_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_desk')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'furniture_desk')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_furniture_desk"></div>
                             </div>
@@ -606,11 +659,11 @@
                                     <span>Missing</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="furniture_chair_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="furniture_chair_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_furniture_chair">
                                     📷 Upload photos of chair
-                                    <input type="file" name="furniture_chair_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_chair')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'furniture_chair')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_furniture_chair"></div>
                             </div>
@@ -636,11 +689,11 @@
                                     <span>Missing</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="furniture_wardrobe_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="furniture_wardrobe_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_furniture_wardrobe">
                                     📷 Upload photos of wardrobe
-                                    <input type="file" name="furniture_wardrobe_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_wardrobe')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'furniture_wardrobe')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_furniture_wardrobe"></div>
                             </div>
@@ -648,7 +701,7 @@
                     </div>
                 </div>
 
-                <!-- COMMON AREAS -->
+                <!-- GEMEINSCHAFTSBEREICHE -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">👥 Common Areas</h2>
@@ -670,11 +723,11 @@
                                     <span>Damaged</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="common_kitchen_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="common_kitchen_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_common_kitchen">
                                     📷 Upload photos of kitchen
-                                    <input type="file" name="common_kitchen_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'common_kitchen')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'common_kitchen')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_common_kitchen"></div>
                             </div>
@@ -696,11 +749,11 @@
                                     <span>Damaged</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="common_bathroom_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="common_bathroom_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_common_bathroom">
                                     📷 Upload photos of bathroom
-                                    <input type="file" name="common_bathroom_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'common_bathroom')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'common_bathroom')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_common_bathroom"></div>
                             </div>
@@ -722,11 +775,11 @@
                                     <span>Damaged</span>
                                 </label>
                             </div>
-                            <textarea class="remarks" name="common_hallway_remarks" placeholder="Remarks..."></textarea>
+                            <textarea class="remarks" id="common_hallway_remarks" placeholder="Remarks..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_common_hallway">
                                     📷 Upload photos of hallway
-                                    <input type="file" name="common_hallway_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'common_hallway')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'common_hallway')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_common_hallway"></div>
                             </div>
@@ -734,19 +787,19 @@
                     </div>
                 </div>
 
-                <!-- KEYS -->
+                <!-- SCHLÜSSEL -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">🔑 Keys</h2>
                     </div>
                     <div class="section-content">
                         <div class="item">
-                            <div class="item-name">Number of keys handed over</div>
-                            <textarea class="remarks" name="keys_details" placeholder="E.g. 2x apartment keys, 1x mailbox key, 1x front door key..."></textarea>
+                            <div class="item-name">Anzahl übergebener Keys</div>
+                            <textarea class="remarks" id="keys_details" placeholder="Z.B. 2x apartment keys, 1x mailbox key, 1x front door key..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_keys">
                                     📷 Photo of all keys
-                                    <input type="file" name="keys_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'keys')">
+                                    <input type="file" accept="image/*" multiple onchange="handlePhotoUpload(this, 'keys')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_keys"></div>
                             </div>
@@ -754,7 +807,7 @@
                     </div>
                 </div>
 
-                <!-- METER READINGS -->
+                <!-- ZÄHLERSTÄNDE -->
                 <div class="section">
                     <div class="section-header">
                         <h2 class="section-title">⚡ Meter Readings</h2>
@@ -762,11 +815,11 @@
                     <div class="section-content">
                         <div class="item">
                             <div class="item-name">Electricity Meter</div>
-                            <textarea class="remarks" name="meter_electricity" placeholder="Enter meter reading..."></textarea>
+                            <textarea class="remarks" id="meter_electricity" placeholder="Enter meter reading..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_meter_electricity">
                                     📷 Photo of electricity meter
-                                    <input type="file" name="meter_electricity_photos" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'meter_electricity')">
+                                    <input type="file" accept="image/*" onchange="handlePhotoUpload(this, 'meter_electricity')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_meter_electricity"></div>
                             </div>
@@ -774,11 +827,11 @@
 
                         <div class="item">
                             <div class="item-name">Water Meter</div>
-                            <textarea class="remarks" name="meter_water" placeholder="Hot water / Cold water readings..."></textarea>
+                            <textarea class="remarks" id="meter_water" placeholder="Warmwasser / Kaltwasser Meter Readings..."></textarea>
                             <div class="photo-upload-section">
                                 <label class="photo-upload-label" id="label_meter_water">
                                     📷 Photo of water meter
-                                    <input type="file" name="meter_water_photos" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'meter_water')">
+                                    <input type="file" accept="image/*" onchange="handlePhotoUpload(this, 'meter_water')">
                                 </label>
                                 <div class="photo-preview-container" id="preview_meter_water"></div>
                             </div>
@@ -786,30 +839,69 @@
                     </div>
                 </div>
 
-                <!-- SIGNATURES -->
+                <!-- E-MAIL & UNTERSCHRIFTEN -->
                 <div class="signature-section">
-                    <h3>✍️ Signatures & Date</h3>
+                    <h3>📧 E-Mail-Addressn für Versand</h3>
+                    <div class="info-box">
+                        Please enter all email addresses. The PDF should be sent to these addresses.
+                    </div>
+                    
                     <div class="signature-group">
                         <div class="signature-field">
-                            <label>Outgoing Tenant (Name): *</label>
-                            <input type="text" name="tenant_outgoing_name" required>
+                            <label>Email Outgoing Tenant: *</label>
+                            <input type="email" id="email_outgoing" required placeholder="tenant.old@example.com">
                         </div>
                         <div class="signature-field">
-                            <label>Incoming Tenant (Name): *</label>
-                            <input type="text" name="tenant_incoming_name" required>
+                            <label>Email Incoming Tenant: *</label>
+                            <input type="email" id="email_incoming" required placeholder="tenant.new@example.com">
                         </div>
                         <div class="signature-field">
-                            <label>Handover Date: *</label>
-                            <input type="date" name="handover_date" required>
+                            <label>Email Landlord:</label>
+                            <input type="email" id="email_landlord" value="chriskranz88@googlemail.com" placeholder="landlord@example.com">
                         </div>
+                    </div>
+
+                    <h3>✍️ Digital Signatures</h3>
+                    <div class="info-box">
+                        Please sign with your finger on the gray field. Works best on smartphone!
+                    </div>
+                    
+                    <div class="signature-canvas-container">
+                        <div class="signature-canvas-label">Signature Outgoing Tenant</div>
+                        <canvas id="signature_outgoing" class="signature-canvas"></canvas>
+                        <div class="signature-buttons">
+                            <button type="button" class="clear-signature" onclick="clearSignature('signature_outgoing')">Clear</button>
+                            <input type="text" placeholder="Name" id="name_outgoing" required style="flex: 1; margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                    </div>
+
+                    <div class="signature-canvas-container">
+                        <div class="signature-canvas-label">Signature Incoming Tenant</div>
+                        <canvas id="signature_incoming" class="signature-canvas"></canvas>
+                        <div class="signature-buttons">
+                            <button type="button" class="clear-signature" onclick="clearSignature('signature_incoming')">Clear</button>
+                            <input type="text" placeholder="Name" id="name_incoming" required style="flex: 1; margin-left: 10px; padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                    </div>
+
+                    <div class="signature-field">
+                        <label>Handover Date: *</label>
+                        <input type="date" id="handover_date" required>
                     </div>
                 </div>
 
                 <!-- SUBMIT -->
                 <div class="submit-section">
-                    <button type="submit" class="submit-btn">📧 Submit Protocol</button>
+                    <button type="button" class="submit-btn" id="generatePdfBtn" onclick="generateAndDownloadPDF()">
+                        📄 Create & Download PDF
+                    </button>
                     <div class="progress-indicator" id="progressIndicator">
-                        ⏳ Submitting protocol...
+                        ⏳ Creating PDF... Please wait...
+                    </div>
+                    <div class="success-message" id="successMessage">
+                        ✅ PDF successfully created and downloaded!<br>
+                        <strong>Next step:</strong> Send the PDF via email to:<br>
+                        <span id="emailList"></span>
                     </div>
                 </div>
             </form>
@@ -817,13 +909,206 @@
     </div>
 
     <script>
-        // Store photos data
-        const photosData = {};
-
-        // Toggle room number field
+        // Store all data globally
+        const formData = {
+            photos: {},
+            signatures: {}
+        };
+        
+        // Signature Pad Setup
+        function initializeSignaturePad(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = 150;
+            
+            // Fill with white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            function getCoordinates(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                const coords = getCoordinates(e);
+                lastX = coords.x;
+                lastY = coords.y;
+                e.preventDefault();
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                
+                const coords = getCoordinates(e);
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(coords.x, coords.y);
+                ctx.strokeStyle = '#000000';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+                
+                lastX = coords.x;
+                lastY = coords.y;
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            canvas.addEventListener('touchstart', startDrawing, { passive: false });
+            canvas.addEventListener('touchmove', draw, { passive: false });
+            canvas.addEventListener('touchend', stopDrawing);
+            canvas.addEventListener('touchcancel', stopDrawing);
+        }
+        
+        function clearSignature(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        // Initialize signature pads on load
+        window.addEventListener('load', function() {
+            initializeSignaturePad('signature_outgoing');
+            initializeSignaturePad('signature_incoming');
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('handover_date').value = today;
+        });
+        
+        // Photo handling with compression
+        function compressImage(file, maxSizeMB = 1) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        // Resize if too large
+                        const maxDimension = 1600;
+                        if (width > maxDimension || height > maxDimension) {
+                            if (width > height) {
+                                height = (height / width) * maxDimension;
+                                width = maxDimension;
+                            } else {
+                                width = (width / height) * maxDimension;
+                                height = maxDimension;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, width, height);
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to JPEG
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        resolve(dataUrl);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        async function handlePhotoUpload(input, category) {
+            const files = Array.from(input.files);
+            const label = document.getElementById(`label_${category}`);
+            const previewContainer = document.getElementById(`preview_${category}`);
+            
+            if (files.length === 0) return;
+            
+            label.classList.add('has-files');
+            label.innerHTML = `⏳ ${files.length} photo(s) being compressed...`;
+            
+            // Compress photos
+            const compressedDataUrls = [];
+            for (const file of files) {
+                const compressed = await compressImage(file);
+                compressedDataUrls.push(compressed);
+            }
+            
+            formData.photos[category] = compressedDataUrls;
+            label.innerHTML = `✅ ${compressedDataUrls.length} photo(s) compressed`;
+            
+            // Show previews
+            previewContainer.innerHTML = '';
+            compressedDataUrls.forEach((dataUrl, index) => {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview';
+                preview.innerHTML = `
+                    <img src="${dataUrl}" alt="Photo ${index + 1}">
+                    <button type="button" class="remove-photo" onclick="removePhoto('${category}', ${index})">×</button>
+                `;
+                previewContainer.appendChild(preview);
+            });
+        }
+        
+        function removePhoto(category, index) {
+            formData.photos[category].splice(index, 1);
+            
+            // Update preview
+            const previewContainer = document.getElementById(`preview_${category}`);
+            const label = document.getElementById(`label_${category}`);
+            
+            if (formData.photos[category].length === 0) {
+                delete formData.photos[category];
+                label.classList.remove('has-files');
+                label.innerHTML = `📷 Upload photos`;
+                previewContainer.innerHTML = '';
+            } else {
+                label.innerHTML = `✅ ${formData.photos[category].length} photo(s) compressed`;
+                previewContainer.innerHTML = '';
+                formData.photos[category].forEach((dataUrl, idx) => {
+                    const preview = document.createElement('div');
+                    preview.className = 'photo-preview';
+                    preview.innerHTML = `
+                        <img src="${dataUrl}" alt="Photo ${idx + 1}">
+                        <button type="button" class="remove-photo" onclick="removePhoto('${category}', ${idx})">×</button>
+                    `;
+                    previewContainer.appendChild(preview);
+                });
+            }
+        }
+        
         function toggleRoomNumber(show) {
             const field = document.getElementById('room_number_field');
-            const input = document.querySelector('textarea[name="room_number"]');
+            const input = document.getElementById('room_number');
             if (show) {
                 field.style.display = 'block';
                 input.required = true;
@@ -833,12 +1118,10 @@
                 input.value = '';
             }
         }
-
-        // Update radio button styling
+        
         function updateRadio(radio) {
             const name = radio.name;
             const allRadios = document.querySelectorAll(`input[name="${name}"]`);
-            
             allRadios.forEach(r => {
                 if (r === radio && r.checked) {
                     r.parentElement.classList.add('checked');
@@ -847,85 +1130,425 @@
                 }
             });
         }
-
-        // Handle photo upload
-        function handlePhotoUpload(input, category) {
-            const files = Array.from(input.files);
-            const previewContainer = document.getElementById(`preview_${category}`);
-            const label = document.getElementById(`label_${category}`);
+        
+        function getFormValue(id) {
+            const element = document.getElementById(id);
+            if (!element) return '';
+            if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+                return element.value || '';
+            }
+            return '';
+        }
+        
+        function getRadioValue(name) {
+            const radio = document.querySelector(`input[name="${name}"]:checked`);
+            return radio ? radio.value : 'Not specified';
+        }
+        
+        async function generateAndDownloadPDF() {
+            const btn = document.getElementById('generatePdfBtn');
+            const progress = document.getElementById('progressIndicator');
+            const success = document.getElementById('successMessage');
             
-            if (files.length > 0) {
-                label.classList.add('has-files');
-                label.innerHTML = `✅ ${files.length} photo(s) selected`;
+            // Validate
+            const requiredFields = ['property_address', 'name_outgoing', 'name_incoming', 'handover_date', 
+                                   'email_outgoing', 'email_incoming'];
+            for (const fieldId of requiredFields) {
+                const element = document.getElementById(fieldId);
+                if (!element.value) {
+                    alert('Please fill out all required fields!');
+                    element.focus();
+                    return;
+                }
             }
             
-            // Clear previous previews
-            previewContainer.innerHTML = '';
+            // Check signatures
+            const sigOutgoing = document.getElementById('signature_outgoing');
+            const sigIncoming = document.getElementById('signature_incoming');
+            const ctxOut = sigOutgoing.getContext('2d');
+            const ctxIn = sigIncoming.getContext('2d');
             
-            // Store files
-            if (!photosData[category]) {
-                photosData[category] = [];
+            // Check if canvas is blank (simple check)
+            const blankCanvas = document.createElement('canvas');
+            blankCanvas.width = sigOutgoing.width;
+            blankCanvas.height = sigOutgoing.height;
+            const blankCtx = blankCanvas.getContext('2d');
+            blankCtx.fillStyle = '#ffffff';
+            blankCtx.fillRect(0, 0, blankCanvas.width, blankCanvas.height);
+            
+            if (sigOutgoing.toDataURL() === blankCanvas.toDataURL() || 
+                sigIncoming.toDataURL() === blankCanvas.toDataURL()) {
+                alert('Please sign both signature fields!');
+                return;
             }
-            photosData[category] = files;
             
-            // Create previews
-            files.forEach((file, index) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.createElement('div');
-                    preview.className = 'photo-preview';
-                    preview.innerHTML = `
-                        <img src="${e.target.result}" alt="Photo ${index + 1}">
-                        <button type="button" class="remove-photo" onclick="removePhoto('${category}', ${index})">×</button>
-                    `;
-                    previewContainer.appendChild(preview);
-                };
-                reader.readAsDataURL(file);
-            });
+            btn.disabled = true;
+            progress.style.display = 'block';
+            success.style.display = 'none';
+            
+            try {
+                // Get jsPDF from window (loaded from CDN)
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                let yPosition = 20;
+                const pageHeight = doc.internal.pageSize.height;
+                const margin = 15;
+                const contentWidth = doc.internal.pageSize.width - 2 * margin;
+                
+                // Helper function to add new page if needed
+                function checkAddPage(neededSpace = 20) {
+                    if (yPosition + neededSpace > pageHeight - 20) {
+                        doc.addPage();
+                        yPosition = 20;
+                        return true;
+                    }
+                    return false;
+                }
+                
+                // Title
+                doc.setFontSize(20);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Handover Protocol', margin, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Documentation of Condition at Handover', margin, yPosition);
+                yPosition += 15;
+                
+                // Section: Property Details
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Property Details', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Address: ${getFormValue('property_address')}`, margin, yPosition);
+                yPosition += 6;
+                doc.text(`Art: ${getRadioValue('property_type')}`, margin, yPosition);
+                yPosition += 6;
+                const roomNumber = getFormValue('room_number');
+                if (roomNumber) {
+                    doc.text(`Room: ${roomNumber}`, margin, yPosition);
+                    yPosition += 6;
+                }
+                yPosition += 5;
+                
+                // Section: Room
+                checkAddPage(30);
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Room', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const roomItems = [
+                    { label: 'Walls', name: 'room_walls', remarks: 'room_walls_remarks' },
+                    { label: 'Floor', name: 'room_floor', remarks: 'room_floor_remarks' },
+                    { label: 'Windows', name: 'room_windows', remarks: 'room_windows_remarks' },
+                    { label: 'Cleanliness', name: 'room_cleanliness', remarks: 'room_cleanliness_remarks' }
+                ];
+                
+                for (const item of roomItems) {
+                    checkAddPage(15);
+                    doc.text(`• ${item.label}: ${getRadioValue(item.name)}`, margin + 2, yPosition);
+                    yPosition += 5;
+                    const remarks = getFormValue(item.remarks);
+                    if (remarks) {
+                        doc.setFontSize(9);
+                        doc.setTextColor(80, 80, 80);
+                        const lines = doc.splitTextToSize(`  Remark: ${remarks}`, contentWidth - 5);
+                        doc.text(lines, margin + 2, yPosition);
+                        yPosition += lines.length * 4;
+                        doc.setFontSize(10);
+                        doc.setTextColor(0, 0, 0);
+                    }
+                    
+                    // Add photos if available
+                    if (formData.photos[item.name] && formData.photos[item.name].length > 0) {
+                        yPosition += 2;
+                        for (const photoData of formData.photos[item.name]) {
+                            checkAddPage(60);
+                            try {
+                                doc.addImage(photoData, 'JPEG', margin + 2, yPosition, 50, 50);
+                                yPosition += 52;
+                            } catch (e) {
+                                console.error('Error adding image:', e);
+                            }
+                        }
+                    }
+                    yPosition += 3;
+                }
+                
+                yPosition += 5;
+                
+                // Section: Furniture
+                checkAddPage(30);
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Furniture', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const furnitureItems = [
+                    { label: 'Bed', name: 'furniture_bed', remarks: 'furniture_bed_remarks' },
+                    { label: 'Desk', name: 'furniture_desk', remarks: 'furniture_desk_remarks' },
+                    { label: 'Chair', name: 'furniture_chair', remarks: 'furniture_chair_remarks' },
+                    { label: 'Wardrobe', name: 'furniture_wardrobe', remarks: 'furniture_wardrobe_remarks' }
+                ];
+                
+                for (const item of furnitureItems) {
+                    checkAddPage(15);
+                    doc.text(`• ${item.label}: ${getRadioValue(item.name)}`, margin + 2, yPosition);
+                    yPosition += 5;
+                    const remarks = getFormValue(item.remarks);
+                    if (remarks) {
+                        doc.setFontSize(9);
+                        doc.setTextColor(80, 80, 80);
+                        const lines = doc.splitTextToSize(`  Remark: ${remarks}`, contentWidth - 5);
+                        doc.text(lines, margin + 2, yPosition);
+                        yPosition += lines.length * 4;
+                        doc.setFontSize(10);
+                        doc.setTextColor(0, 0, 0);
+                    }
+                    
+                    if (formData.photos[item.name] && formData.photos[item.name].length > 0) {
+                        yPosition += 2;
+                        for (const photoData of formData.photos[item.name]) {
+                            checkAddPage(60);
+                            try {
+                                doc.addImage(photoData, 'JPEG', margin + 2, yPosition, 50, 50);
+                                yPosition += 52;
+                            } catch (e) {
+                                console.error('Error adding image:', e);
+                            }
+                        }
+                    }
+                    yPosition += 3;
+                }
+                
+                yPosition += 5;
+                
+                // Section: Common Areas
+                checkAddPage(30);
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Common Areas', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const commonItems = [
+                    { label: 'Kitchen', name: 'common_kitchen', remarks: 'common_kitchen_remarks' },
+                    { label: 'Bathroom', name: 'common_bathroom', remarks: 'common_bathroom_remarks' },
+                    { label: 'Hallway', name: 'common_hallway', remarks: 'common_hallway_remarks' }
+                ];
+                
+                for (const item of commonItems) {
+                    checkAddPage(15);
+                    doc.text(`• ${item.label}: ${getRadioValue(item.name)}`, margin + 2, yPosition);
+                    yPosition += 5;
+                    const remarks = getFormValue(item.remarks);
+                    if (remarks) {
+                        doc.setFontSize(9);
+                        doc.setTextColor(80, 80, 80);
+                        const lines = doc.splitTextToSize(`  Remark: ${remarks}`, contentWidth - 5);
+                        doc.text(lines, margin + 2, yPosition);
+                        yPosition += lines.length * 4;
+                        doc.setFontSize(10);
+                        doc.setTextColor(0, 0, 0);
+                    }
+                    
+                    if (formData.photos[item.name] && formData.photos[item.name].length > 0) {
+                        yPosition += 2;
+                        for (const photoData of formData.photos[item.name]) {
+                            checkAddPage(60);
+                            try {
+                                doc.addImage(photoData, 'JPEG', margin + 2, yPosition, 50, 50);
+                                yPosition += 52;
+                            } catch (e) {
+                                console.error('Error adding image:', e);
+                            }
+                        }
+                    }
+                    yPosition += 3;
+                }
+                
+                yPosition += 5;
+                
+                // Section: Keys
+                checkAddPage(20);
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Keys', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                const keysDetails = getFormValue('keys_details');
+                if (keysDetails) {
+                    const lines = doc.splitTextToSize(keysDetails, contentWidth);
+                    doc.text(lines, margin + 2, yPosition);
+                    yPosition += lines.length * 5;
+                }
+                
+                if (formData.photos['keys'] && formData.photos['keys'].length > 0) {
+                    yPosition += 2;
+                    for (const photoData of formData.photos['keys']) {
+                        checkAddPage(60);
+                        try {
+                            doc.addImage(photoData, 'JPEG', margin + 2, yPosition, 50, 50);
+                            yPosition += 52;
+                        } catch (e) {
+                            console.error('Error adding image:', e);
+                        }
+                    }
+                }
+                
+                yPosition += 5;
+                
+                // Section: Meter Readings
+                checkAddPage(20);
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Meter Readings', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                const meterElectricity = getFormValue('meter_electricity');
+                if (meterElectricity) {
+                    doc.text(`Electricity: ${meterElectricity}`, margin + 2, yPosition);
+                    yPosition += 5;
+                }
+                
+                if (formData.photos['meter_electricity'] && formData.photos['meter_electricity'].length > 0) {
+                    yPosition += 2;
+                    for (const photoData of formData.photos['meter_electricity']) {
+                        checkAddPage(60);
+                        try {
+                            doc.addImage(photoData, 'JPEG', margin + 2, yPosition, 50, 50);
+                            yPosition += 52;
+                        } catch (e) {
+                            console.error('Error adding image:', e);
+                        }
+                    }
+                }
+                
+                yPosition += 5;
+                
+                const meterWater = getFormValue('meter_water');
+                if (meterWater) {
+                    checkAddPage(10);
+                    doc.text(`Water: ${meterWater}`, margin + 2, yPosition);
+                    yPosition += 5;
+                }
+                
+                if (formData.photos['meter_water'] && formData.photos['meter_water'].length > 0) {
+                    yPosition += 2;
+                    for (const photoData of formData.photos['meter_water']) {
+                        checkAddPage(60);
+                        try {
+                            doc.addImage(photoData, 'JPEG', margin + 2, yPosition, 50, 50);
+                            yPosition += 52;
+                        } catch (e) {
+                            console.error('Error adding image:', e);
+                        }
+                    }
+                }
+                
+                yPosition += 10;
+                
+                // Section: Unterschriften
+                checkAddPage(80);
+                doc.setFontSize(14);
+                doc.setTextColor(139, 0, 0);
+                doc.text('Unterschriften', margin, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                
+                // Outgoing tenant signature
+                doc.text('Outgoing Tenant:', margin, yPosition);
+                yPosition += 5;
+                doc.text(getFormValue('name_outgoing'), margin, yPosition);
+                yPosition += 5;
+                
+                const sigOutgoingData = sigOutgoing.toDataURL('image/png');
+                doc.addImage(sigOutgoingData, 'PNG', margin, yPosition, 60, 20);
+                yPosition += 25;
+                
+                // Incoming tenant signature
+                doc.text('Incoming Tenant:', margin, yPosition);
+                yPosition += 5;
+                doc.text(getFormValue('name_incoming'), margin, yPosition);
+                yPosition += 5;
+                
+                const sigIncomingData = sigIncoming.toDataURL('image/png');
+                doc.addImage(sigIncomingData, 'PNG', margin, yPosition, 60, 20);
+                yPosition += 25;
+                
+                // Date
+                doc.text(`Date: ${getFormValue('handover_date')}`, margin, yPosition);
+                
+                // Save PDF
+                const filename = `Uebergabeprotokoll_${getFormValue('property_address').replace(/[^a-zA-Z0-9]/g, '_')}_${getFormValue('handover_date')}.pdf`;
+                doc.save(filename);
+                
+                // Show success message
+                progress.style.display = 'none';
+                success.style.display = 'block';
+                
+                const emails = [
+                    getFormValue('email_outgoing'),
+                    getFormValue('email_incoming'),
+                    getFormValue('email_landlord')
+                ].filter(e => e).join(', ');
+                
+                document.getElementById('emailList').textContent = emails;
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('Error creating PDF: ' + error.message);
+                progress.style.display = 'none';
+            }
+            
+            btn.disabled = false;
         }
-
-        // Remove photo
-        function removePhoto(category, index) {
-            photosData[category].splice(index, 1);
-            const input = document.querySelector(`input[name="${category}_photos"]`);
-            
-            // Recreate file list
-            const dt = new DataTransfer();
-            photosData[category].forEach(file => dt.items.add(file));
-            input.files = dt.files;
-            
-            // Update preview
-            handlePhotoUpload(input, category);
-        }
-
-        // Form submission
-        document.getElementById('handoverForm').addEventListener('submit', function(e) {
-            const progressIndicator = document.getElementById('progressIndicator');
-            progressIndicator.style.display = 'block';
-        });
-
+        
         // Auto-save to localStorage
         document.addEventListener('input', function(e) {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                localStorage.setItem('en_' + e.target.name, e.target.value);
+            if (e.target.id) {
+                localStorage.setItem('en_' + e.target.id, e.target.value);
             }
         });
-
+        
         // Load from localStorage
         window.addEventListener('load', function() {
-            document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(element => {
-                const saved = localStorage.getItem('en_' + element.name);
-                if (saved) {
+            document.querySelectorAll('input[type="text"], input[type="email"], input[type="date"], textarea').forEach(element => {
+                const saved = localStorage.getItem('en_' + element.id);
+                if (saved && element.id !== 'email_landlord') {
                     element.value = saved;
                 }
             });
             
-            // Load radio selections
             document.querySelectorAll('input[type="radio"]').forEach(radio => {
                 const saved = localStorage.getItem('en_' + radio.name);
                 if (saved === radio.value) {
                     radio.checked = true;
                     radio.parentElement.classList.add('checked');
+                    if (radio.name === 'property_type' && radio.value === 'Room') {
+                        toggleRoomNumber(true);
+                    }
                 }
             });
         });
