@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Übergabeprotokoll / Handover Protocol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #8b0000;
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .language-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .language-card {
+            position: relative;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .language-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: #8b0000;
+        }
+        
+        .language-card .flag {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .language-card h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #8b0000;
+        }
+        
+        .language-card p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .info-section {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .info-section h3 {
+            color: #1976d2;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .info-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .info-section li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .info-section li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .backup-section {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 25px;
+            border-radius: 8px;
+        }
+        
+        .backup-section h3 {
+            color: #e65100;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .backup-links {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .backup-link {
+            display: block;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: #e65100;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid #ff9800;
+        }
+        
+        .backup-link:hover {
+            background: #e65100;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 30px;
+            }
+            
+            .language-selection {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .backup-links {
+                grid-template-columns: 1fr;
+            }
+            
+            .language-card {
+                padding: 30px 20px;
+            }
+            
+            .language-card .flag {
+                font-size: 48px;
+            }
+            
+            .language-card h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Übergabeprotokoll / Handover Protocol</h1>
+            <p>Bitte wählen Sie Ihre Sprache / Please select your language</p>
+        </div>
+        
+        <div class="content">
+            <div class="language-selection">
+                <a href="handover-protocol-de.html" class="language-card">
+                    <div class="flag">🇩🇪</div>
+                    <h2>Deutsch</h2>
+                    <p>Deutsches Übergabeprotokoll</p>
+                </a>
+                
+                <a href="handover-protocol-en.html" class="language-card">
+                    <div class="flag">🇬🇧</div>
+                    <h2>English</h2>
+                    <p>English Handover Protocol</p>
+                </a>
+            </div>
+            
+            <div class="info-section">
+                <h3>ℹ️ Was Sie erwartet / What to expect:</h3>
+                <ul>
+                    <li><strong>DE:</strong> Interaktives Formular mit Foto-Upload direkt vom Handy</li>
+                    <li><strong>EN:</strong> Interactive form with photo upload directly from your phone</li>
+                    <li><strong>DE:</strong> Automatischer Versand per E-Mail mit allen Fotos</li>
+                    <li><strong>EN:</strong> Automatic email delivery with all photos</li>
+                    <li><strong>DE:</strong> Alle Daten werden automatisch gespeichert</li>
+                    <li><strong>EN:</strong> All data is saved automatically</li>
+                </ul>
+            </div>
+            
+            <div class="backup-section">
+                <h3>📄 Backup: PDF-Formulare zum Download</h3>
+                <p style="margin-bottom: 15px; color: #666;">
+                    <strong>DE:</strong> Falls die Online-Version nicht funktioniert, können Sie die PDF-Version herunterladen.<br>
+                    <strong>EN:</strong> If the online version doesn't work, you can download the PDF version.
+                </p>
+                <div class="backup-links">
+                    <a href="Uebergabeprotokoll_DE.pdf" class="backup-link" download>
+                        🇩🇪 PDF Deutsch
+                    </a>
+                    <a href="Handover_Protocol_EN.pdf" class="backup-link" download>
+                        🇬🇧 PDF English
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

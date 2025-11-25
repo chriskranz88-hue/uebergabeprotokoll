@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Übergabeprotokoll</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #8b0000;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .instructions h2 {
+            color: #1976d2;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .section-header {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            border-bottom: 2px solid #8b0000;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #8b0000;
+            font-weight: 600;
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .item {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s;
+            background: white;
+            font-size: 14px;
+        }
+        
+        .checkbox-label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .checkbox-label.checked {
+            border-color: #8b0000;
+            background: #fff5f5;
+        }
+        
+        input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .remarks {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+            margin-bottom: 10px;
+        }
+        
+        .remarks:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .photo-upload-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border: 2px dashed #ddd;
+        }
+        
+        .photo-upload-label {
+            display: block;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border: 2px dashed #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .photo-upload-label:hover {
+            background: #f8f9ff;
+            border-color: #8b0000;
+        }
+        
+        .photo-upload-label.has-files {
+            border-color: #4caf50;
+            background: #f1f8f4;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .photo-preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .photo-preview {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 5px;
+            overflow: hidden;
+            border: 2px solid #ddd;
+        }
+        
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .photo-preview .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+        }
+        
+        .signature-section {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .signature-section h3 {
+            color: #8b0000;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        
+        .signature-group {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .signature-field {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .signature-field label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .signature-field input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .signature-field input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .submit-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .submit-btn {
+            background: #8b0000;
+            color: white;
+            padding: 15px 50px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .submit-btn:hover {
+            background: #660000;
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .progress-indicator {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 5px;
+            border-left: 4px solid #ff9800;
+        }
+        
+        .success-message {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 5px;
+            border-left: 4px solid #4caf50;
+            color: #2e7d32;
+        }
+        
+        .error-message {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #ffebee;
+            border-radius: 5px;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .checkbox-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .checkbox-label {
+                justify-content: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Übergabeprotokoll</h1>
+            <p>Dokumentation des Zustands bei Übergabe</p>
+        </div>
+        
+        <div class="content">
+            <div class="instructions">
+                <h2>📋 Anleitung</h2>
+                <ol>
+                    <li>Füllen Sie zuerst die Objektdaten aus</li>
+                    <li>Gehen Sie durch alle Kategorien</li>
+                    <li>Machen Sie Fotos direkt mit der Handy-Kamera</li>
+                    <li>Laden Sie die Fotos bei jedem Punkt hoch</li>
+                    <li>Unterschreiben Sie am Ende</li>
+                    <li>Klicken Sie auf "Protokoll absenden"</li>
+                </ol>
+            </div>
+
+            <form id="handoverForm" action="https://formsubmit.co/chriskranz88@googlemail.com" method="POST" enctype="multipart/form-data">
+                
+                <!-- Hidden fields for FormSubmit -->
+                <input type="hidden" name="_subject" value="Übergabeprotokoll">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_template" value="table">
+                <input type="text" name="_honey" style="display:none">
+                
+                <!-- OBJEKTDATEN -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🏢 Objektdaten</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="item">
+                            <div class="item-name">Adresse *</div>
+                            <textarea class="remarks" name="property_address" placeholder="Straße, Hausnummer, PLZ, Ort&#10;z.B. Engadinerstr. 36, 81475 München" required style="min-height: 80px;"></textarea>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Art des Objekts *</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="property_type" value="Ganze Wohnung" onchange="updateRadio(this); toggleRoomNumber(false)" required>
+                                    <span>Ganze Wohnung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="property_type" value="Zimmer" onchange="updateRadio(this); toggleRoomNumber(true)">
+                                    <span>Zimmer</span>
+                                </label>
+                            </div>
+                            <div id="room_number_field" style="display: none; margin-top: 15px;">
+                                <textarea class="remarks" name="room_number" placeholder="Zimmernummer / Bezeichnung&#10;z.B. Zimmer 1, Zimmer 2A, etc." style="min-height: 60px;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ZIMMER -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🚪 Zimmer</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="item">
+                            <div class="item-name">Wände</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_walls" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_walls" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_walls" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_walls" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="room_walls_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_room_walls">
+                                    📷 Fotos von Wänden hochladen
+                                    <input type="file" name="room_walls_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'room_walls')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_room_walls"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Boden</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_floor" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_floor" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_floor" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_floor" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="room_floor_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_room_floor">
+                                    📷 Fotos vom Boden hochladen
+                                    <input type="file" name="room_floor_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'room_floor')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_room_floor"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Fenster</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_windows" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_windows" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_windows" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_windows" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="room_windows_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_room_windows">
+                                    📷 Fotos von Fenstern hochladen
+                                    <input type="file" name="room_windows_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'room_windows')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_room_windows"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Sauberkeit</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_cleanliness" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_cleanliness" value="Leicht verschmutzt" onchange="updateRadio(this)">
+                                    <span>Leicht verschmutzt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="room_cleanliness" value="Stark verschmutzt" onchange="updateRadio(this)">
+                                    <span>Stark verschmutzt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="room_cleanliness_remarks" placeholder="Bemerkungen..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MÖBEL -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🛋️ Möbel</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="item">
+                            <div class="item-name">Bett</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_bed" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_bed" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_bed" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_bed" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="furniture_bed_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_furniture_bed">
+                                    📷 Fotos vom Bett hochladen
+                                    <input type="file" name="furniture_bed_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_bed')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_furniture_bed"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Schreibtisch</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_desk" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_desk" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_desk" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_desk" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="furniture_desk_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_furniture_desk">
+                                    📷 Fotos vom Schreibtisch hochladen
+                                    <input type="file" name="furniture_desk_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_desk')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_furniture_desk"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Stuhl</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_chair" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_chair" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_chair" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_chair" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="furniture_chair_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_furniture_chair">
+                                    📷 Fotos vom Stuhl hochladen
+                                    <input type="file" name="furniture_chair_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_chair')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_furniture_chair"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Kleiderschrank</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_wardrobe" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_wardrobe" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_wardrobe" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="furniture_wardrobe" value="Fehlt" onchange="updateRadio(this)">
+                                    <span>Fehlt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="furniture_wardrobe_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_furniture_wardrobe">
+                                    📷 Fotos vom Schrank hochladen
+                                    <input type="file" name="furniture_wardrobe_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'furniture_wardrobe')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_furniture_wardrobe"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GEMEINSCHAFTSBEREICHE -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">👥 Gemeinschaftsbereiche</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="item">
+                            <div class="item-name">Küche</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_kitchen" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_kitchen" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_kitchen" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="common_kitchen_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_common_kitchen">
+                                    📷 Fotos von Küche hochladen
+                                    <input type="file" name="common_kitchen_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'common_kitchen')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_common_kitchen"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Badezimmer</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_bathroom" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_bathroom" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_bathroom" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="common_bathroom_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_common_bathroom">
+                                    📷 Fotos vom Bad hochladen
+                                    <input type="file" name="common_bathroom_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'common_bathroom')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_common_bathroom"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Flur</div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_hallway" value="Ausgezeichnet" onchange="updateRadio(this)">
+                                    <span>Ausgezeichnet</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_hallway" value="Leichte Abnutzung" onchange="updateRadio(this)">
+                                    <span>Leichte Abnutzung</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="radio" name="common_hallway" value="Beschädigt" onchange="updateRadio(this)">
+                                    <span>Beschädigt</span>
+                                </label>
+                            </div>
+                            <textarea class="remarks" name="common_hallway_remarks" placeholder="Bemerkungen..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_common_hallway">
+                                    📷 Fotos vom Flur hochladen
+                                    <input type="file" name="common_hallway_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'common_hallway')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_common_hallway"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCHLÜSSEL -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">🔑 Schlüssel</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="item">
+                            <div class="item-name">Anzahl übergebener Schlüssel</div>
+                            <textarea class="remarks" name="keys_details" placeholder="Z.B. 2x Wohnungsschlüssel, 1x Briefkastenschlüssel, 1x Haustürschlüssel..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_keys">
+                                    📷 Foto von allen Schlüsseln
+                                    <input type="file" name="keys_photos" accept="image/*" capture="environment" multiple onchange="handlePhotoUpload(this, 'keys')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_keys"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ZÄHLERSTÄNDE -->
+                <div class="section">
+                    <div class="section-header">
+                        <h2 class="section-title">⚡ Zählerstände</h2>
+                    </div>
+                    <div class="section-content">
+                        <div class="item">
+                            <div class="item-name">Stromzähler</div>
+                            <textarea class="remarks" name="meter_electricity" placeholder="Zählerstand eingeben..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_meter_electricity">
+                                    📷 Foto vom Stromzähler
+                                    <input type="file" name="meter_electricity_photos" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'meter_electricity')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_meter_electricity"></div>
+                            </div>
+                        </div>
+
+                        <div class="item">
+                            <div class="item-name">Wasserzähler</div>
+                            <textarea class="remarks" name="meter_water" placeholder="Warmwasser / Kaltwasser Zählerstände..."></textarea>
+                            <div class="photo-upload-section">
+                                <label class="photo-upload-label" id="label_meter_water">
+                                    📷 Foto vom Wasserzähler
+                                    <input type="file" name="meter_water_photos" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'meter_water')">
+                                </label>
+                                <div class="photo-preview-container" id="preview_meter_water"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UNTERSCHRIFTEN -->
+                <div class="signature-section">
+                    <h3>✍️ Unterschriften & Datum</h3>
+                    <div class="signature-group">
+                        <div class="signature-field">
+                            <label>Ausziehender Mieter (Name): *</label>
+                            <input type="text" name="tenant_outgoing_name" required>
+                        </div>
+                        <div class="signature-field">
+                            <label>Einziehender Mieter (Name): *</label>
+                            <input type="text" name="tenant_incoming_name" required>
+                        </div>
+                        <div class="signature-field">
+                            <label>Datum der Übergabe: *</label>
+                            <input type="date" name="handover_date" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT -->
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn">📧 Protokoll absenden</button>
+                    <div class="progress-indicator" id="progressIndicator">
+                        ⏳ Protokoll wird gesendet...
+                    </div>
+                    <div class="success-message" id="successMessage">
+                        ✅ Protokoll erfolgreich versendet!
+                    </div>
+                    <div class="error-message" id="errorMessage">
+                        ❌ Fehler beim Versenden. Bitte versuchen Sie es erneut.
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Store photos data
+        const photosData = {};
+
+        // Toggle room number field
+        function toggleRoomNumber(show) {
+            const field = document.getElementById('room_number_field');
+            const input = document.querySelector('textarea[name="room_number"]');
+            if (show) {
+                field.style.display = 'block';
+                input.required = true;
+            } else {
+                field.style.display = 'none';
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        // Update radio button styling
+        function updateRadio(radio) {
+            const name = radio.name;
+            const allRadios = document.querySelectorAll(`input[name="${name}"]`);
+            
+            allRadios.forEach(r => {
+                if (r === radio && r.checked) {
+                    r.parentElement.classList.add('checked');
+                } else {
+                    r.parentElement.classList.remove('checked');
+                }
+            });
+        }
+
+        // Handle photo upload
+        function handlePhotoUpload(input, category) {
+            const files = Array.from(input.files);
+            const previewContainer = document.getElementById(`preview_${category}`);
+            const label = document.getElementById(`label_${category}`);
+            
+            if (files.length > 0) {
+                label.classList.add('has-files');
+                label.innerHTML = `✅ ${files.length} Foto(s) ausgewählt`;
+            }
+            
+            // Clear previous previews
+            previewContainer.innerHTML = '';
+            
+            // Store files
+            if (!photosData[category]) {
+                photosData[category] = [];
+            }
+            photosData[category] = files;
+            
+            // Create previews
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.className = 'photo-preview';
+                    preview.innerHTML = `
+                        <img src="${e.target.result}" alt="Photo ${index + 1}">
+                        <button type="button" class="remove-photo" onclick="removePhoto('${category}', ${index})">×</button>
+                    `;
+                    previewContainer.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Remove photo
+        function removePhoto(category, index) {
+            photosData[category].splice(index, 1);
+            const input = document.querySelector(`input[name="${category}_photos"]`);
+            
+            // Recreate file list
+            const dt = new DataTransfer();
+            photosData[category].forEach(file => dt.items.add(file));
+            input.files = dt.files;
+            
+            // Update preview
+            handlePhotoUpload(input, category);
+        }
+
+        // Form submission
+        document.getElementById('handoverForm').addEventListener('submit', function(e) {
+            const progressIndicator = document.getElementById('progressIndicator');
+            progressIndicator.style.display = 'block';
+        });
+
+        // Auto-save to localStorage
+        document.addEventListener('input', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                localStorage.setItem(e.target.name, e.target.value);
+            }
+        });
+
+        // Load from localStorage
+        window.addEventListener('load', function() {
+            document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(element => {
+                const saved = localStorage.getItem(element.name);
+                if (saved) {
+                    element.value = saved;
+                }
+            });
+            
+            // Load radio selections
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                const saved = localStorage.getItem(radio.name);
+                if (saved === radio.value) {
+                    radio.checked = true;
+                    radio.parentElement.classList.add('checked');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
