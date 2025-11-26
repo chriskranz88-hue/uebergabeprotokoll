@@ -911,7 +911,7 @@
     <script>
         // GOOGLE APPS SCRIPT INTEGRATION
         // IMPORTANT: Replace this URL mit deiner eigenen Web-App-URL nach dem Deployment!
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzx870MDJ90jcSWLkXGazabk3TQULwJgiXWIFHu-1QRzICA_0eD6aEAkpiFu2d30S77nQ/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/library/d/1_rF8YxA0QKhe7LwdS6tfecIpqIgVjBRRh-veyCty3oEKz_VADjh-04Uc/2';
         // Example: 'https://script.google.com/macros/s/AKfycbxXXXXXXXXXXXXXXXXXXX/exec'
         
         // Store all data globally
@@ -1595,8 +1595,23 @@
          */
         async function sendEmailViaGoogleScript(pdfDoc, formDataObj) {
             try {
-                // Convert PDF to base64
-                const pdfBase64 = pdfDoc.output('datauristring');
+                console.log('Preparing PDF for email transmission...');
+                
+                // Convert PDF to base64 (without data URI prefix)
+                const pdfBase64 = pdfDoc.output('dataurlstring');
+                
+                // Extract only the Base64 part (after the comma)
+                const base64Data = pdfBase64.split(',')[1];
+                
+                // Log for debugging
+                console.log('PDF size (base64):', Math.round(base64Data.length / 1024), 'KB');
+                console.log('Estimated PDF size:', Math.round(base64Data.length * 0.75 / 1024), 'KB');
+                
+                // Warning for large files
+                if (base64Data.length * 0.75 > 25 * 1024 * 1024) {
+                    console.warn('WARNING: PDF is larger than 25MB! Gmail may reject it.');
+                    alert('Warning: PDF is very large (>25MB). Email sending may fail. Please use fewer photos.');
+                }
                 
                 // Prepare data for Google Script
                 const payload = {
@@ -1610,22 +1625,38 @@
                     email_incoming: formDataObj.email_incoming,
                     email_landlord: formDataObj.email_landlord,
                     handover_date: formDataObj.handover_date,
-                    pdfBase64: pdfBase64,
+                    pdfBase64: base64Data, // Only Base64, no data URL prefix
                     pdfFilename: formDataObj.pdfFilename
                 };
+                
+                console.log('Sending to Google Apps Script...');
+                console.log('Payload size:', Math.round(JSON.stringify(payload).length / 1024), 'KB');
                 
                 // Send to Google Apps Script
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Important for Google Apps Script
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    redirect: 'follow'
                 });
                 
-                // With no-cors mode we cannot read the response
-                // But if no error is thrown, we assume success
+                // Check response
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
+                
+                // Try to read response (only works with CORS-enabled domains)
+                try {
+                    const result = await response.text();
+                    console.log('Server response:', result);
+                } catch (e) {
+                    // Ignore - no-cors mode prevents reading response
+                    console.log('Response received (no-cors mode, cannot read details)');
+                }
+                
+                console.log('Email sent successfully!');
                 return { success: true };
                 
             } catch (error) {
