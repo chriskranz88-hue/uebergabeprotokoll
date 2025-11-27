@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handover Protocol - Simplified</title>
+    
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #8b0000;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 5px;
+        }
+        
+        .instructions h2 {
+            color: #1976d2;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        
+        .instructions strong {
+            color: #d32f2f;
+        }
+        
+        .info-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #8b0000;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #8b0000;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .radio-label:hover {
+            border-color: #667eea;
+            background: #f0f0f0;
+        }
+        
+        .radio-label input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .radio-label input[type="radio"]:checked + span {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .condition-group {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .condition-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .photo-upload {
+            margin-top: 15px;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .photo-upload:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+        
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+        
+        .photo-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .signature-field {
+            margin-top: 20px;
+        }
+        
+        .signature-pad {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: crosshair;
+            background: white;
+            display: block;
+            margin: 10px 0;
+        }
+        
+        .signature-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .clear-btn {
+            padding: 8px 15px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .clear-btn:hover {
+            background: #d32f2f;
+        }
+        
+        .submit-btn {
+            background: #8b0000;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            background: #660000;
+        }
+        
+        .progress-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #e3f2fd;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .success-message {
+            display: none;
+            background: #c8e6c9;
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        
+        .success-message h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+        
+        .success-message ol {
+            margin-left: 20px;
+            color: #1b5e20;
+        }
+        
+        .success-message li {
+            margin-bottom: 10px;
+            line-height: 1.8;
+        }
+        
+        @media (max-width: 600px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .radio-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Handover Protocol</h1>
+            <p>Documentation of Condition at Handover</p>
+        </div>
+        
+        <div class="content">
+            <div class="instructions">
+                <h2>📋 Instructions - Please Read Carefully!</h2>
+                <ol>
+                    <li>Fill out <strong>all fields</strong> of the form carefully</li>
+                    <li>Take <strong>photos</strong> of all relevant areas (automatically compressed)</li>
+                    <li><strong>Sign digitally</strong> with your finger/mouse in both signature fields</li>
+                    <li>Click on <strong>"Create & Download PDF"</strong></li>
+                    <li><strong>IMPORTANT:</strong> The PDF will be saved in your device's <strong>Downloads folder</strong></li>
+                    <li><strong>Send the PDF via email</strong> to:
+                        <ul style="margin-top: 10px;">
+                            <li>✉️ Outgoing tenant</li>
+                            <li>✉️ Incoming tenant</li>
+                            <li>✉️ Landlord (chriskranz88@googlemail.com)</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="info-box">
+                <strong>💡 Tip:</strong> The form automatically saves your entries in the browser. You can close the form temporarily and continue later!
+            </div>
+            
+            <form id="protocolForm">
+                <!-- Property Information -->
+                <div class="section">
+                    <h2 class="section-title">📍 Property Details</h2>
+                    
+                    <div class="form-group">
+                        <label>Full Address: *</label>
+                        <input type="text" id="property_address" required placeholder="e.g. Engadiner Str. 36, 81475 Munich">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Type of Handover: *</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="property_type" value="entire_apartment" required>
+                                <span>Entire Apartment</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="property_type" value="room" required>
+                                <span>Room</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="room_number_group" style="display:none;">
+                        <label>Room Number (if room):</label>
+                        <input type="text" id="room_number" placeholder="e.g. Room 1">
+                    </div>
+                </div>
+                
+                <!-- Parties Information -->
+                <div class="section">
+                    <h2 class="section-title">👥 Parties Involved</h2>
+                    
+                    <div class="form-group">
+                        <label>Outgoing Tenant - Name: *</label>
+                        <input type="text" id="name_outgoing" required placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Outgoing Tenant - Email: *</label>
+                        <input type="text" id="email_outgoing" required placeholder="john@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Incoming Tenant - Name: *</label>
+                        <input type="text" id="name_incoming" required placeholder="Jane Smith">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Incoming Tenant - Email: *</label>
+                        <input type="text" id="email_incoming" required placeholder="jane@example.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Handover Date: *</label>
+                        <input type="date" id="handover_date" required>
+                    </div>
+                </div>
+                
+                <!-- Room Condition -->
+                <div class="section">
+                    <h2 class="section-title">🚪 Room</h2>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Walls:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="walls_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="walls_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="walls_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="walls_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('walls_photos').click()">
+                            <input type="file" id="walls_photos" accept="image/*" multiple onchange="handlePhotoUpload('walls', this)">
+                            <p class="photo-label" id="walls_photos_label">📷 Upload photos of walls</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Floor:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="floor_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="floor_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="floor_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="floor_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('floor_photos').click()">
+                            <input type="file" id="floor_photos" accept="image/*" multiple onchange="handlePhotoUpload('floor', this)">
+                            <p class="photo-label" id="floor_photos_label">📷 Upload photos of floor</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Windows:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="windows_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="windows_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="windows_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="windows_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('windows_photos').click()">
+                            <input type="file" id="windows_photos" accept="image/*" multiple onchange="handlePhotoUpload('windows', this)">
+                            <p class="photo-label" id="windows_photos_label">📷 Upload photos of windows</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Cleanliness:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="cleanliness_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="cleanliness_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="cleanliness_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="cleanliness_remarks" placeholder="Remarks..." rows="2"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Furniture -->
+                <div class="section">
+                    <h2 class="section-title">🛋️ Furniture (if furnished)</h2>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Bed:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="bed_condition" value="excellent">
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="bed_condition" value="minor_wear">
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="bed_condition" value="damaged">
+                                <span>Damaged</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="bed_condition" value="not_applicable" checked>
+                                <span>Not Present</span>
+                            </label>
+                        </div>
+                        <textarea id="bed_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('bed_photos').click()">
+                            <input type="file" id="bed_photos" accept="image/*" multiple onchange="handlePhotoUpload('bed', this)">
+                            <p class="photo-label" id="bed_photos_label">📷 Upload photos of bed</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Desk:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="desk_condition" value="excellent">
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="desk_condition" value="minor_wear">
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="desk_condition" value="damaged">
+                                <span>Damaged</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="desk_condition" value="not_applicable" checked>
+                                <span>Not Present</span>
+                            </label>
+                        </div>
+                        <textarea id="desk_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('desk_photos').click()">
+                            <input type="file" id="desk_photos" accept="image/*" multiple onchange="handlePhotoUpload('desk', this)">
+                            <p class="photo-label" id="desk_photos_label">📷 Upload photos of desk</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Chair:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="chair_condition" value="excellent">
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="chair_condition" value="minor_wear">
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="chair_condition" value="damaged">
+                                <span>Damaged</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="chair_condition" value="not_applicable" checked>
+                                <span>Not Present</span>
+                            </label>
+                        </div>
+                        <textarea id="chair_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('chair_photos').click()">
+                            <input type="file" id="chair_photos" accept="image/*" multiple onchange="handlePhotoUpload('chair', this)">
+                            <p class="photo-label" id="chair_photos_label">📷 Upload photos of chair</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Wardrobe:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="wardrobe_condition" value="excellent">
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="wardrobe_condition" value="minor_wear">
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="wardrobe_condition" value="damaged">
+                                <span>Damaged</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="wardrobe_condition" value="not_applicable" checked>
+                                <span>Not Present</span>
+                            </label>
+                        </div>
+                        <textarea id="wardrobe_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('wardrobe_photos').click()">
+                            <input type="file" id="wardrobe_photos" accept="image/*" multiple onchange="handlePhotoUpload('wardrobe', this)">
+                            <p class="photo-label" id="wardrobe_photos_label">📷 Upload photos of wardrobe</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Common Areas -->
+                <div class="section">
+                    <h2 class="section-title">🏘️ Common Areas</h2>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Kitchen:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="kitchen_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="kitchen_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="kitchen_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="kitchen_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('kitchen_photos').click()">
+                            <input type="file" id="kitchen_photos" accept="image/*" multiple onchange="handlePhotoUpload('kitchen', this)">
+                            <p class="photo-label" id="kitchen_photos_label">📷 Upload photos of kitchen</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Bathroom:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="bathroom_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="bathroom_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="bathroom_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="bathroom_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('bathroom_photos').click()">
+                            <input type="file" id="bathroom_photos" accept="image/*" multiple onchange="handlePhotoUpload('bathroom', this)">
+                            <p class="photo-label" id="bathroom_photos_label">📷 Upload photos of bathroom</p>
+                        </div>
+                    </div>
+                    
+                    <div class="condition-group">
+                        <div class="condition-title">Hallway:</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="hallway_condition" value="excellent" required>
+                                <span>Excellent</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="hallway_condition" value="minor_wear" required>
+                                <span>Minor Wear</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="hallway_condition" value="damaged" required>
+                                <span>Damaged</span>
+                            </label>
+                        </div>
+                        <textarea id="hallway_remarks" placeholder="Remarks..." rows="2"></textarea>
+                        <div class="photo-upload" onclick="document.getElementById('hallway_photos').click()">
+                            <input type="file" id="hallway_photos" accept="image/*" multiple onchange="handlePhotoUpload('hallway', this)">
+                            <p class="photo-label" id="hallway_photos_label">📷 Upload photos of hallway</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Keys -->
+                <div class="section">
+                    <h2 class="section-title">🔑 Keys</h2>
+                    
+                    <div class="form-group">
+                        <label>Number of keys handed over: *</label>
+                        <input type="text" id="keys_count" required placeholder="e.g. 2 house keys, 1 room key">
+                    </div>
+                    
+                    <div class="photo-upload" onclick="document.getElementById('keys_photo').click()">
+                        <input type="file" id="keys_photo" accept="image/*" onchange="handlePhotoUpload('keys', this)">
+                        <p class="photo-label" id="keys_photo_label">📷 Photo of all keys</p>
+                    </div>
+                </div>
+                
+                <!-- Signatures -->
+                <div class="section">
+                    <h2 class="section-title">✍️ Signatures</h2>
+                    
+                    <div class="signature-field">
+                        <label>Signature Outgoing Tenant: *</label>
+                        <canvas id="signature_outgoing" class="signature-pad" width="400" height="150"></canvas>
+                        <div class="signature-buttons">
+                            <button type="button" class="clear-btn" onclick="clearSignature('signature_outgoing')">Clear</button>
+                        </div>
+                    </div>
+                    
+                    <div class="signature-field">
+                        <label>Signature Incoming Tenant: *</label>
+                        <canvas id="signature_incoming" class="signature-pad" width="400" height="150"></canvas>
+                        <div class="signature-buttons">
+                            <button type="button" class="clear-btn" onclick="clearSignature('signature_incoming')">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit -->
+                <button type="submit" class="submit-btn" id="generatePdfBtn">
+                    📄 Create & Download PDF
+                </button>
+                
+                <div class="progress-indicator" id="progressIndicator">
+                    <p>⏳ Creating PDF... Please wait...</p>
+                </div>
+                
+                <div class="success-message" id="successMessage">
+                    <h3>✅ PDF successfully created and downloaded!</h3>
+                    <p><strong>Next steps:</strong></p>
+                    <ol>
+                        <li>📁 The PDF has been saved in your device's <strong>Downloads folder</strong></li>
+                        <li>📧 Open your email program</li>
+                        <li>✉️ Send the PDF to the following email addresses:
+                            <ul style="margin-top: 5px; margin-left: 20px;">
+                                <li id="emailOutgoing"></li>
+                                <li id="emailIncoming"></li>
+                                <li>chriskranz88@googlemail.com (Landlord)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p style="margin-top: 15px;"><strong>💡 Tip:</strong> Attach the PDF and write a short message, e.g. "Please find attached the completed handover protocol"</p>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        const formData = {
+            photos: {}
+        };
+        const signatures = {
+            outgoing: null,
+            incoming: null
+        };
+        
+        // Show/hide room number field
+        document.querySelectorAll('input[name="property_type"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('room_number_group').style.display = 
+                    this.value === 'room' ? 'block' : 'none';
+            });
+        });
+        
+        // Photo upload handler with compression
+        async function handlePhotoUpload(category, input) {
+            const files = Array.from(input.files);
+            const label = document.getElementById(category + '_photos_label') || 
+                         document.getElementById(category + '_photo_label');
+            
+            if (files.length === 0) return;
+            
+            label.innerHTML = `⏳ ${files.length} photo(s) being compressed...`;
+            
+            const compressedDataUrls = [];
+            
+            for (const file of files) {
+                const dataUrl = await compressImage(file);
+                compressedDataUrls.push(dataUrl);
+            }
+            
+            formData.photos[category] = compressedDataUrls;
+            label.innerHTML = `✅ ${compressedDataUrls.length} photo(s) compressed`;
+            
+            // Save to localStorage
+            localStorage.setItem('en_photos_' + category, JSON.stringify(compressedDataUrls));
+        }
+        
+        // Compress image
+        function compressImage(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        const maxDim = 1600;
+                        if (width > height && width > maxDim) {
+                            height = (height / width) * maxDim;
+                            width = maxDim;
+                        } else if (height > maxDim) {
+                            width = (width / height) * maxDim;
+                            height = maxDim;
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // Signature pad setup
+        function setupSignaturePad(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            
+            function getCoordinates(e) {
+                const rect = canvas.getBoundingClientRect();
+                const touch = e.touches ? e.touches[0] : e;
+                return {
+                    x: touch.clientX - rect.left,
+                    y: touch.clientY - rect.top
+                };
+            }
+            
+            function startDrawing(e) {
+                isDrawing = true;
+                const coords = getCoordinates(e);
+                lastX = coords.x;
+                lastY = coords.y;
+            }
+            
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                
+                const coords = getCoordinates(e);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(coords.x, coords.y);
+                ctx.stroke();
+                
+                lastX = coords.x;
+                lastY = coords.y;
+            }
+            
+            function stopDrawing() {
+                isDrawing = false;
+            }
+            
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            canvas.addEventListener('touchstart', startDrawing);
+            canvas.addEventListener('touchmove', draw);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+        
+        function clearSignature(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        setupSignaturePad('signature_outgoing');
+        setupSignaturePad('signature_incoming');
+        
+        // Fill canvas with white background
+        ['signature_outgoing', 'signature_incoming'].forEach(id => {
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        // Form submission
+        document.getElementById('protocolForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get signatures
+            signatures.outgoing = document.getElementById('signature_outgoing').toDataURL();
+            signatures.incoming = document.getElementById('signature_incoming').toDataURL();
+            
+            // Validate signatures
+            const outgoingCanvas = document.getElementById('signature_outgoing');
+            const incomingCanvas = document.getElementById('signature_incoming');
+            const isOutgoingSigned = !isCanvasBlank(outgoingCanvas);
+            const isIncomingSigned = !isCanvasBlank(incomingCanvas);
+            
+            if (!isOutgoingSigned || !isIncomingSigned) {
+                alert('Please fill in both signatures!');
+                return;
+            }
+            
+            document.getElementById('progressIndicator').style.display = 'block';
+            document.getElementById('generatePdfBtn').disabled = true;
+            
+            try {
+                await generatePDF();
+                
+                // Show success message
+                document.getElementById('progressIndicator').style.display = 'none';
+                const successMsg = document.getElementById('successMessage');
+                successMsg.style.display = 'block';
+                
+                // Fill in email addresses
+                document.getElementById('emailOutgoing').textContent = document.getElementById('email_outgoing').value;
+                document.getElementById('emailIncoming').textContent = document.getElementById('email_incoming').value;
+                
+                // Scroll to success message
+                successMsg.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error creating PDF. Please try again.');
+                document.getElementById('progressIndicator').style.display = 'none';
+                document.getElementById('generatePdfBtn').disabled = false;
+            }
+        });
+        
+        function isCanvasBlank(canvas) {
+            const ctx = canvas.getContext('2d');
+            const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            
+            for (let i = 0; i < pixelData.length; i += 4) {
+                if (pixelData[i] !== 255 || pixelData[i+1] !== 255 || pixelData[i+2] !== 255) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        
+        function getFormValue(id) {
+            const element = document.getElementById(id);
+            return element ? element.value : '';
+        }
+        
+        function getRadioValue(name) {
+            const radio = document.querySelector(`input[name="${name}"]:checked`);
+            return radio ? radio.value : '';
+        }
+        
+        function getConditionLabel(value) {
+            const labels = {
+                'excellent': 'Excellent',
+                'minor_wear': 'Minor Wear',
+                'damaged': 'Damaged',
+                'not_applicable': 'Not Present'
+            };
+            return labels[value] || value;
+        }
+        
+        async function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            let yPos = 20;
+            const leftMargin = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const pageHeight = doc.internal.pageSize.height;
+            
+            // Helper functions
+            function checkPageBreak(needed) {
+                if (yPos + needed > pageHeight - 20) {
+                    doc.addPage();
+                    yPos = 20;
+                    return true;
+                }
+                return false;
+            }
+            
+            function addCheckbox(x, y, isChecked) {
+                doc.setLineWidth(0.5);
+                doc.rect(x, y, 4, 4);
+                if (isChecked) {
+                    doc.setLineWidth(1);
+                    doc.line(x, y, x + 4, y + 4);
+                    doc.line(x + 4, y, x, y + 4);
+                }
+            }
+            
+            // Title
+            doc.setFontSize(20);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Handover Protocol', pageWidth / 2, yPos, { align: 'center' });
+            yPos += 15;
+            
+            // Property Information
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Property Details', leftMargin, yPos);
+            yPos += 8;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Address: ${getFormValue('property_address')}`, leftMargin, yPos);
+            yPos += 6;
+            doc.text(`Type: ${getRadioValue('property_type') === 'room' ? 'Room' : 'Entire Apartment'}`, leftMargin, yPos);
+            yPos += 6;
+            if (getFormValue('room_number')) {
+                doc.text(`Room Number: ${getFormValue('room_number')}`, leftMargin, yPos);
+                yPos += 6;
+            }
+            yPos += 5;
+            
+            // Parties
+            checkPageBreak(30);
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Parties Involved', leftMargin, yPos);
+            yPos += 8;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Outgoing Tenant: ${getFormValue('name_outgoing')} (${getFormValue('email_outgoing')})`, leftMargin, yPos);
+            yPos += 6;
+            doc.text(`Incoming Tenant: ${getFormValue('name_incoming')} (${getFormValue('email_incoming')})`, leftMargin, yPos);
+            yPos += 6;
+            doc.text(`Handover Date: ${getFormValue('handover_date')}`, leftMargin, yPos);
+            yPos += 10;
+            
+            // Room Condition
+            const roomConditions = [
+                { name: 'Walls', key: 'walls' },
+                { name: 'Floor', key: 'floor' },
+                { name: 'Windows', key: 'windows' },
+                { name: 'Cleanliness', key: 'cleanliness' }
+            ];
+            
+            checkPageBreak(20);
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Room', leftMargin, yPos);
+            yPos += 8;
+            
+            for (const item of roomConditions) {
+                checkPageBreak(25);
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'bold');
+                doc.text(item.name + ':', leftMargin, yPos);
+                yPos += 6;
+                
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(10);
+                
+                const condition = getRadioValue(item.key + '_condition');
+                const xCheckbox = leftMargin + 5;
+                
+                // Checkboxes
+                addCheckbox(xCheckbox, yPos - 3, condition === 'excellent');
+                doc.text('Excellent', xCheckbox + 6, yPos);
+                
+                addCheckbox(xCheckbox + 35, yPos - 3, condition === 'minor_wear');
+                doc.text('Minor Wear', xCheckbox + 41, yPos);
+                
+                addCheckbox(xCheckbox + 70, yPos - 3, condition === 'damaged');
+                doc.text('Damaged', xCheckbox + 76, yPos);
+                
+                yPos += 6;
+                
+                const remarks = getFormValue(item.key + '_remarks');
+                if (remarks) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    const lines = doc.splitTextToSize(`Remarks: ${remarks}`, pageWidth - 40);
+                    doc.text(lines, leftMargin + 5, yPos);
+                    yPos += lines.length * 4 + 2;
+                }
+                
+                // Add photos
+                if (formData.photos[item.key] && formData.photos[item.key].length > 0) {
+                    for (const photoData of formData.photos[item.key]) {
+                        checkPageBreak(60);
+                        try {
+                            doc.addImage(photoData, 'JPEG', leftMargin + 5, yPos, 80, 60);
+                            yPos += 65;
+                        } catch (e) {
+                            console.error('Error adding image:', e);
+                        }
+                    }
+                }
+                
+                yPos += 3;
+            }
+            
+            // Furniture
+            const furnitureItems = [
+                { name: 'Bed', key: 'bed' },
+                { name: 'Desk', key: 'desk' },
+                { name: 'Chair', key: 'chair' },
+                { name: 'Wardrobe', key: 'wardrobe' }
+            ];
+            
+            checkPageBreak(20);
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Furniture', leftMargin, yPos);
+            yPos += 8;
+            
+            for (const item of furnitureItems) {
+                const condition = getRadioValue(item.key + '_condition');
+                if (condition === 'not_applicable') continue;
+                
+                checkPageBreak(25);
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'bold');
+                doc.text(item.name + ':', leftMargin, yPos);
+                yPos += 6;
+                
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(10);
+                
+                const xCheckbox = leftMargin + 5;
+                
+                addCheckbox(xCheckbox, yPos - 3, condition === 'excellent');
+                doc.text('Excellent', xCheckbox + 6, yPos);
+                
+                addCheckbox(xCheckbox + 35, yPos - 3, condition === 'minor_wear');
+                doc.text('Minor Wear', xCheckbox + 41, yPos);
+                
+                addCheckbox(xCheckbox + 70, yPos - 3, condition === 'damaged');
+                doc.text('Damaged', xCheckbox + 76, yPos);
+                
+                yPos += 6;
+                
+                const remarks = getFormValue(item.key + '_remarks');
+                if (remarks) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    const lines = doc.splitTextToSize(`Remarks: ${remarks}`, pageWidth - 40);
+                    doc.text(lines, leftMargin + 5, yPos);
+                    yPos += lines.length * 4 + 2;
+                }
+                
+                if (formData.photos[item.key] && formData.photos[item.key].length > 0) {
+                    for (const photoData of formData.photos[item.key]) {
+                        checkPageBreak(60);
+                        try {
+                            doc.addImage(photoData, 'JPEG', leftMargin + 5, yPos, 80, 60);
+                            yPos += 65;
+                        } catch (e) {
+                            console.error('Error adding image:', e);
+                        }
+                    }
+                }
+                
+                yPos += 3;
+            }
+            
+            // Common Areas
+            const commonAreas = [
+                { name: 'Kitchen', key: 'kitchen' },
+                { name: 'Bathroom', key: 'bathroom' },
+                { name: 'Hallway', key: 'hallway' }
+            ];
+            
+            checkPageBreak(20);
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Common Areas', leftMargin, yPos);
+            yPos += 8;
+            
+            for (const item of commonAreas) {
+                checkPageBreak(25);
+                doc.setFontSize(11);
+                doc.setTextColor(0, 0, 0);
+                doc.setFont(undefined, 'bold');
+                doc.text(item.name + ':', leftMargin, yPos);
+                yPos += 6;
+                
+                doc.setFont(undefined, 'normal');
+                doc.setFontSize(10);
+                
+                const condition = getRadioValue(item.key + '_condition');
+                const xCheckbox = leftMargin + 5;
+                
+                addCheckbox(xCheckbox, yPos - 3, condition === 'excellent');
+                doc.text('Excellent', xCheckbox + 6, yPos);
+                
+                addCheckbox(xCheckbox + 35, yPos - 3, condition === 'minor_wear');
+                doc.text('Minor Wear', xCheckbox + 41, yPos);
+                
+                addCheckbox(xCheckbox + 70, yPos - 3, condition === 'damaged');
+                doc.text('Damaged', xCheckbox + 76, yPos);
+                
+                yPos += 6;
+                
+                const remarks = getFormValue(item.key + '_remarks');
+                if (remarks) {
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    const lines = doc.splitTextToSize(`Remarks: ${remarks}`, pageWidth - 40);
+                    doc.text(lines, leftMargin + 5, yPos);
+                    yPos += lines.length * 4 + 2;
+                }
+                
+                if (formData.photos[item.key] && formData.photos[item.key].length > 0) {
+                    for (const photoData of formData.photos[item.key]) {
+                        checkPageBreak(60);
+                        try {
+                            doc.addImage(photoData, 'JPEG', leftMargin + 5, yPos, 80, 60);
+                            yPos += 65;
+                        } catch (e) {
+                            console.error('Error adding image:', e);
+                        }
+                    }
+                }
+                
+                yPos += 3;
+            }
+            
+            // Keys
+            checkPageBreak(20);
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Keys', leftMargin, yPos);
+            yPos += 8;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Number: ${getFormValue('keys_count')}`, leftMargin, yPos);
+            yPos += 8;
+            
+            if (formData.photos['keys'] && formData.photos['keys'].length > 0) {
+                checkPageBreak(60);
+                try {
+                    doc.addImage(formData.photos['keys'][0], 'JPEG', leftMargin + 5, yPos, 80, 60);
+                    yPos += 65;
+                } catch (e) {
+                    console.error('Error adding image:', e);
+                }
+            }
+            
+            // Signatures
+            checkPageBreak(80);
+            doc.setFontSize(14);
+            doc.setTextColor(139, 0, 0);
+            doc.text('Signatures', leftMargin, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Outgoing Tenant:', leftMargin, yPos);
+            yPos += 5;
+            doc.addImage(signatures.outgoing, 'PNG', leftMargin, yPos, 80, 30);
+            yPos += 35;
+            
+            doc.text('Incoming Tenant:', leftMargin, yPos);
+            yPos += 5;
+            doc.addImage(signatures.incoming, 'PNG', leftMargin, yPos, 80, 30);
+            
+            // Save PDF
+            const address = getFormValue('property_address').replace(/[^a-z0-9]/gi, '_');
+            const date = getFormValue('handover_date').replace(/-/g, '');
+            const filename = `Handover_Protocol_${address}_${date}.pdf`;
+            
+            doc.save(filename);
+        }
+        
+        // Auto-save to localStorage
+        document.addEventListener('input', function(e) {
+            if (e.target.id) {
+                localStorage.setItem('en_' + e.target.id, e.target.value);
+            }
+        });
+        
+        // Load from localStorage on page load
+        window.addEventListener('load', function() {
+            document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(element => {
+                const saved = localStorage.getItem('en_' + element.id);
+                if (saved) element.value = saved;
+            });
+            
+            document.querySelectorAll('input[type="radio"]').forEach(element => {
+                const saved = localStorage.getItem('en_' + element.name);
+                if (saved && element.value === saved) element.checked = true;
+            });
+        });
+    </script>
+</body>
+</html>
